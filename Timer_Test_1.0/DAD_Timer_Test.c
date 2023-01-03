@@ -47,47 +47,27 @@
  * Author: 
 *******************************************************************************/
 /* DriverLib Includes */
+#include <DAD_Timer.h>
 #include <ti/devices/msp432p4xx/driverlib/driverlib.h>
 
 /* Standard Includes */
 #include <stdint.h>
 #include <stdbool.h>
 
-// Import Timer Driver definitions
-#include <ti/drivers/Timer.h>
-
-void UserCallbackFunction(Timer_Handle handle);
-
-void UserCallbackFunction(Timer_Handle handle){
-    MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);
-}
 
 int main(void)
 {
-    /* Stop Watchdog  */
+    /* Stop WDT  */
     MAP_WDT_A_holdTimer();
 
     /* Configuring P1.0 as output */
     MAP_GPIO_setAsOutputPin(GPIO_PORT_P1, GPIO_PIN0);
     MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0);
 
-    //Declare timer and params
-    Timer_Handle    handle;
-    Timer_Params    params;
 
-    // Initialize Timer parameters
-    Timer_Params_init(&params);
-    params.periodUnits = Timer_PERIOD_HZ;
-    params.period = 1000;
-    params.timerMode  = Timer_CONTINUOUS_CALLBACK;
-    params.timerCallback = UserCallbackFunction;
+    //Debug - Timer start
+    DAD_Timer_Initialize(DAD_DEFAULT_TIMER_TICKS);
+    DAD_Timer_Start();
 
-
-    // Open Timer instance
-    uint_least8_t CONFIG_TIMER0 = 0;
-    handle = Timer_open(CONFIG_TIMER0, &params);
-
-    //sleep(10000);
-
-    //Timer_stop(handle);
+    //DAD_Timer_Stop();
 }
