@@ -61,9 +61,12 @@ void DAD_Timer_Stop(){
 void TA0_0_IRQHandler(void)
 {
     //Debug - toggle LED
-    MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);
+    //MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);
     MAP_Timer_A_clearCaptureCompareInterrupt(TIMER_A0_BASE,
             TIMER_A_CAPTURECOMPARE_REGISTER_0);
+    //Timer_A_clearInterruptFlag(TIMER_A0_BASE);                                //Trying to clear general interrupt flag
+    if(Timer_A_getInterruptStatus(TIMER_A0_BASE) == TIMER_A_INTERRUPT_PENDING)  //Tests to see that interrupt was cleared
+        MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);                    //If interrupt not cleared, turn on light
 
     //Set Timer Flag
     DAD_timerHasExpired = true;

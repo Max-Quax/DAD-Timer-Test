@@ -70,4 +70,8 @@ int main(void)
     DAD_Timer_Start();
 
     //DAD_Timer_Stop();
+
+    while(true){
+        CS_getSMCLK();
+    }
 }
