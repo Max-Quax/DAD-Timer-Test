@@ -32,18 +32,21 @@ void DAD_Timer_Initialize(uint16_t period_ms, uint32_t timer_base){
     MAP_Timer_A_configureUpMode(timer_base, &DAD_Timer_Config);
 
     //Decide which interrupt
-    uint32_t interrupt;
+    uint32_t interruptNum;
     switch(timer_base){
-    case:TIMER_A0_BASE
-            interrupt = INT_TA0_0;
-    case:TIMER_A1_BASE
-            interrupt = INT_TA0_1;
-    case:TIMER_A2_BASE
-            interrupt = INT_TA0_2;
-    case:TIMER_A3_BASE
-            interrupt = INT_TA0_3;
-    break;
-    MAP_Interrupt_enableInterrupt(interrupt);
+    case TIMER_A0_BASE:
+        interruptNum = INT_TA0_0;
+        break;
+    case TIMER_A1_BASE:
+        interruptNum = INT_TA1_0;
+        break;
+    case TIMER_A2_BASE:
+        interruptNum = INT_TA2_0;
+        break;
+    case TIMER_A3_BASE:
+        interruptNum = INT_TA3_0;
+    }
+    MAP_Interrupt_enableInterrupt(interruptNum);
 
     /* Enabling MASTER interrupts */
     MAP_Interrupt_enableMaster();
