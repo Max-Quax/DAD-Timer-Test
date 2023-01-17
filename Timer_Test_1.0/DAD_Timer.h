@@ -29,12 +29,12 @@
 
 
 //Initialize timer
-void DAD_Timer_Initialize(uint16_t period_ms);
+void DAD_Timer_Initialize(uint16_t period_ms, uint32_t timer_base);
 
 //Start Timer
-void DAD_Timer_Start();
+void DAD_Timer_Start(uint32_t timer_base);
 
 //Stop Timer
-void DAD_Timer_Stop();
+void DAD_Timer_Stop(uint32_t timer_base);
 
 #endif /* DAD_TIMER_H_ */

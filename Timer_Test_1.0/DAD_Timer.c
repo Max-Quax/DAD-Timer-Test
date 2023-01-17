@@ -24,34 +24,43 @@ Timer_A_UpModeConfig DAD_Timer_Config =
 
 
 //Initialize timer with default function
-void DAD_Timer_Initialize(uint16_t period_ms){
+void DAD_Timer_Initialize(uint16_t period_ms, uint32_t timer_base){
     //Set timer period
     DAD_Timer_Config.timerPeriod = period_ms*10;
 
     //Configure timer mode
-    MAP_Timer_A_configureUpMode(TIMER_A0_BASE, &DAD_Timer_Config);
+    MAP_Timer_A_configureUpMode(timer_base, &DAD_Timer_Config);
 
-
-    //Enable interrupts
-    MAP_Interrupt_enableSleepOnIsrExit();
-    MAP_Interrupt_enableInterrupt(INT_TA0_0);
+    //Decide which interrupt
+    uint32_t interrupt;
+    switch(timer_base){
+    case:TIMER_A0_BASE
+            interrupt = INT_TA0_0;
+    case:TIMER_A1_BASE
+            interrupt = INT_TA0_1;
+    case:TIMER_A2_BASE
+            interrupt = INT_TA0_2;
+    case:TIMER_A3_BASE
+            interrupt = INT_TA0_3;
+    break;
+    MAP_Interrupt_enableInterrupt(interrupt);
 
     /* Enabling MASTER interrupts */
     MAP_Interrupt_enableMaster();
 }
 
 //Start Timer
-void DAD_Timer_Start(){
-    MAP_Timer_A_startCounter(TIMER_A0_BASE, TIMER_A_UP_MODE);
+void DAD_Timer_Start(uint32_t timer_base){
+    MAP_Timer_A_startCounter(timer_base, TIMER_A_UP_MODE);
 
     //Set Timer Flag
     DAD_timerHasExpired = false;
 }
 
 //Stop Timer
-void DAD_Timer_Stop(){
+void DAD_Timer_Stop(uint32_t timer_base){
     //Stop timer
-    Timer_A_stopTimer(TIMER_A0_BASE);
+    Timer_A_stopTimer(timer_base);
 
     //Set Timer Flag
     DAD_timerHasExpired = true;

@@ -66,10 +66,10 @@ int main(void)
 
 
     //Debug - Timer start
-    DAD_Timer_Initialize(DAD_DEFAULT_TIMER_TICKS);
-    DAD_Timer_Start();
+    DAD_Timer_Initialize(DAD_DEFAULT_TIMER_TICKS, TIMER_A0_BASE);
+    DAD_Timer_Start(TIMER_A0_BASE);
 
-    //DAD_Timer_Stop();
+    //DAD_Timer_Stop(TIMER_A0_BASE);
 
     while(true){
         CS_getSMCLK();
