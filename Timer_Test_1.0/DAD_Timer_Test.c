@@ -66,12 +66,15 @@ int main(void)
 
 
     //Debug - Timer start
-    DAD_Timer_Initialize(DAD_DEFAULT_TIMER_TICKS, TIMER_A0_BASE);
-    DAD_Timer_Start(TIMER_A0_BASE);
+    Timer_A_UpModeConfig config;
+    DAD_Timer_Initialize(5000, TIMER_A3_BASE, &config);
+    DAD_Timer_Start(TIMER_A3_BASE);
 
     //DAD_Timer_Stop(TIMER_A0_BASE);
-
+    int freq = CS_getACLK() / 32;
     while(true){
-        CS_getSMCLK();
+        if(DAD_Timer_Has_Finished()){
+            DAD_Timer_Start(TIMER_A3_BASE);
+        }
     }
 }
