@@ -67,14 +67,20 @@ int main(void)
 
     //Debug - Timer start
     Timer_A_UpModeConfig config;
-    DAD_Timer_Initialize(5000, TIMER_A3_BASE, &config);
+    DAD_Timer_Initialize(1000, TIMER_A3_BASE, &config);
     DAD_Timer_Start(TIMER_A3_BASE);
 
     //DAD_Timer_Stop(TIMER_A0_BASE);
     int freq = CS_getACLK() / 32;
+    int x = 0;
     while(true){
-        if(DAD_Timer_Has_Finished()){
+        if(DAD_Timer_Has_Finished(TIMER_A3_BASE) && x < 5){
+            MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);
             DAD_Timer_Start(TIMER_A3_BASE);
+            x++;
+        }
+        else if(x >= 5){
+            DAD_Timer_Stop(TIMER_A3_BASE);
         }
     }
 }
