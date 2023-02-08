@@ -25,29 +25,35 @@
 #ifndef DAD_TIMER_H_
 #define DAD_TIMER_H_
 
-//DriverLib Includes
+// DriverLib Includes
 #include <ti/devices/msp432p4xx/driverlib/driverlib.h>
 
-//Standard includes
+// Standard includes
 #include <stdint.h>
 #include <stdbool.h>
 
-//Timer Defines
+// Timer Defines
 #define DAD_DEFAULT_TIMER_TICKS    0x2DC6
 
-//Initialize timer in milliseconds
+// Initialize timer in milliseconds
 void DAD_Timer_Initialize_ms(uint16_t period_ms, uint32_t timerBase, Timer_A_UpModeConfig *timerConfig);
 
-//Initialize timer in microseconds
+// Initialize timer in microseconds
 void DAD_Timer_Initialize_us(uint16_t period_us, uint32_t timerBase, Timer_A_UpModeConfig *timerConfig);
 
-//Start Timer
+// Start Timer
 void DAD_Timer_Start(uint32_t timerBase);
 
+// Check wheter timer has finished
 bool DAD_Timer_Has_Finished(uint32_t timerBase);
 
-//Stop Timer
-void DAD_Timer_Stop(uint32_t timerBase, Timer_A_UpModeConfig *timerConfig);
+// Stop Timer
+    // Returns current time
+double DAD_Timer_Stop(uint32_t timerBase, Timer_A_UpModeConfig *timerConfig);
+
+// Return current time
+    // Returns time (in us or ms depending on how timer was initialized)
+double DAD_Timer_Get_Time(uint32_t timerBase, Timer_A_UpModeConfig *timerConfig);
 
 static void DAD_Timer_Set_Interrupt(uint32_t timerBase);
 

@@ -83,12 +83,12 @@ bool DAD_Timer_Has_Finished(uint32_t timerBase){
     return DAD_timerHasExpired3;
 }
 
-//Stop Timer
-void DAD_Timer_Stop(uint32_t timerBase, Timer_A_UpModeConfig *timerConfig){
-    //Stop timer
+// Stop Timer
+double DAD_Timer_Stop(uint32_t timerBase, Timer_A_UpModeConfig *timerConfig){
+    // Stop timer
     MAP_Timer_A_stopTimer(timerBase);
 
-    //Set Timer Flag
+    // Set Timer Flag
     switch(timerBase){
         case TIMER_A0_BASE:
             DAD_timerHasExpired0 = true;
@@ -102,10 +102,25 @@ void DAD_Timer_Stop(uint32_t timerBase, Timer_A_UpModeConfig *timerConfig){
         case TIMER_A3_BASE:
             DAD_timerHasExpired3 = true;
     }
+
+    // Return current time
+    return DAD_Timer_Get_Time(timerBase, timerConfig);
+}
+
+double DAD_Timer_Get_Time(uint32_t timerBase, Timer_A_UpModeConfig *timerConfig){
+    // Decide if
+    if(timerConfig->clockSource == TIMER_A_CLOCKSOURCE_ACLK)
+        return MAP_Timer_A_getCounterValue(timerBase) * 1.024;  // Time in ms
+    else if (timerConfig->clockSource == TIMER_A_CLOCKSOURCE_SMCLK) {
+        float freq = MAP_CS_getSMCLK()/1000000.0;
+        return MAP_Timer_A_getCounterValue(timerBase) / freq;   // Time in us
+    }
+
+    return 0;                                                   // Default :/
 }
 
 static void DAD_Timer_Set_Interrupt(uint32_t timerBase){
-    //Decide which interrupt
+    // Decide which interrupt
     uint32_t interruptNum;
     switch(timerBase){
     case TIMER_A0_BASE:
@@ -125,78 +140,78 @@ static void DAD_Timer_Set_Interrupt(uint32_t timerBase){
         DAD_timerHasExpired3 = false;
     }
 
-    MAP_Interrupt_enableInterrupt(interruptNum);    //Enable timer interrupt
-    MAP_Interrupt_enableMaster();                   //Enable interrupts
-    MAP_Interrupt_disableSleepOnIsrExit();          //Don't sleep, boi
+    MAP_Interrupt_enableInterrupt(interruptNum);    // Enable timer interrupt
+    MAP_Interrupt_enableMaster();                   // Enable interrupts
+    MAP_Interrupt_disableSleepOnIsrExit();          // Don't sleep, boi
 }
 
-//Interrupt handlers
+// Interrupt handlers
 void TA0_0_IRQHandler(void)
 {
-    MAP_Timer_A_stopTimer(TIMER_A0_BASE);                                           //Stop timer
+    MAP_Timer_A_stopTimer(TIMER_A0_BASE);                                           // Stop timer
 
-    //Clear interrupts
-    MAP_Timer_A_clearInterruptFlag(TIMER_A0_BASE);                                  //Clear general timer interrupt flag
-    MAP_Timer_A_clearCaptureCompareInterrupt(TIMER_A0_BASE,                         //Clear capture interrupt flag
+    // Clear interrupts
+    MAP_Timer_A_clearInterruptFlag(TIMER_A0_BASE);                                  // Clear general timer interrupt flag
+    MAP_Timer_A_clearCaptureCompareInterrupt(TIMER_A0_BASE,                         // Clear capture interrupt flag
                 TIMER_A_CAPTURECOMPARE_REGISTER_0);
 
-    //Debug - toggle LED to indicate interrupt not cleared
-    if(Timer_A_getInterruptStatus(TIMER_A0_BASE) == TIMER_A_INTERRUPT_PENDING)      //Tests to see that interrupt was cleared
-            MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);                    //If interrupt not cleared, turn on light
+    // Debug - toggle LED to indicate interrupt not cleared
+    if(MAP_Timer_A_getInterruptStatus(TIMER_A0_BASE) == TIMER_A_INTERRUPT_PENDING)  // Tests to see that interrupt was cleared
+            MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);                    // If interrupt not cleared, turn on light
 
-    //Set Timer Flag
+    // Set Timer Flag
     DAD_timerHasExpired0 = true;
 }
 
 void TA1_0_IRQHandler(void)
 {
-    MAP_Timer_A_stopTimer(TIMER_A1_BASE);                                           //Stop timer
+    MAP_Timer_A_stopTimer(TIMER_A1_BASE);                                           // Stop timer
 
-    //Clear interrupt
+    // Clear interrupt
     MAP_Timer_A_clearInterruptFlag(TIMER_A1_BASE);
-    MAP_Timer_A_clearCaptureCompareInterrupt(TIMER_A1_BASE,                         //Clear capture interrupt flag
+    MAP_Timer_A_clearCaptureCompareInterrupt(TIMER_A1_BASE,                         // Clear capture interrupt flag
                         TIMER_A_CAPTURECOMPARE_REGISTER_0);
 
-    //Debug - toggle LED to indicate interrupt not cleared
-    if(Timer_A_getInterruptStatus(TIMER_A1_BASE) == TIMER_A_INTERRUPT_PENDING)      //Tests to see that interrupt was cleared
-            MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);                    //If interrupt not cleared, turn on light
+    // Debug - toggle LED to indicate interrupt not cleared
+    if(MAP_Timer_A_getInterruptStatus(TIMER_A1_BASE) == TIMER_A_INTERRUPT_PENDING)  // Tests to see that interrupt was cleared
+            MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);                    // If interrupt not cleared, turn on light
 
-    //Set Timer Flag
+    // Set Timer Flag
     DAD_timerHasExpired1 = true;
 }
 
 
 void TA2_0_IRQHandler(void)
 {
-    MAP_Timer_A_stopTimer(TIMER_A2_BASE);                                           //Stop timer
+    MAP_Timer_A_stopTimer(TIMER_A2_BASE);                                           // Stop timer
 
-    //Clear interrupt
+    // Clear interrupt
     MAP_Timer_A_clearInterruptFlag(TIMER_A2_BASE);
-    MAP_Timer_A_clearCaptureCompareInterrupt(TIMER_A2_BASE,                         //Clear capture interrupt flag
+    MAP_Timer_A_clearCaptureCompareInterrupt(TIMER_A2_BASE,                         // Clear capture interrupt flag
                         TIMER_A_CAPTURECOMPARE_REGISTER_0);
 
-    //Debug - toggle LED to indicate interrupt not cleared
-    if(Timer_A_getInterruptStatus(TIMER_A2_BASE) == TIMER_A_INTERRUPT_PENDING)      //Tests to see that interrupt was cleared
-            MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);                    //If interrupt not cleared, turn on light
+    // Debug - toggle LED to indicate interrupt not cleared
+    if(MAP_Timer_A_getInterruptStatus(TIMER_A2_BASE) == TIMER_A_INTERRUPT_PENDING)  // Tests to see that interrupt was cleared
+            MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);                    // If interrupt not cleared, turn on light
 
-    //Set Timer Flag
+    // Set Timer Flag
     DAD_timerHasExpired2 = true;
 }
 
 
 void TA3_0_IRQHandler(void)
 {
-    MAP_Timer_A_stopTimer(TIMER_A3_BASE);                                           //Stop timer
+    MAP_Timer_A_stopTimer(TIMER_A3_BASE);                                           // Stop timer
 
-    //Clear interrupt
+    // Clear interrupt
     MAP_Timer_A_clearInterruptFlag(TIMER_A3_BASE);
-    MAP_Timer_A_clearCaptureCompareInterrupt(TIMER_A3_BASE,                         //Clear capture interrupt flag
+    MAP_Timer_A_clearCaptureCompareInterrupt(TIMER_A3_BASE,                         // Clear capture interrupt flag
                     TIMER_A_CAPTURECOMPARE_REGISTER_0);
 
-    //Debug - toggle LED to indicate interrupt not cleared
-    if(Timer_A_getInterruptStatus(TIMER_A3_BASE) == TIMER_A_INTERRUPT_PENDING)      //Tests to see that interrupt was cleared
-        MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);                    //If interrupt not cleared, turn on light
+    // Debug - toggle LED to indicate interrupt not cleared
+    if(MAP_Timer_A_getInterruptStatus(TIMER_A3_BASE) == TIMER_A_INTERRUPT_PENDING)  // Tests to see that interrupt was cleared
+        MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);                        // If interrupt not cleared, turn on light
 
-    //Set Timer Flag
+    // Set Timer Flag
     DAD_timerHasExpired3 = true;
 }
