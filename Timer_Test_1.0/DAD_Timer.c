@@ -7,52 +7,51 @@
 
 #include <DAD_Timer.h>
 
-//Timer Variables
+// Timer Variables
 static volatile bool DAD_timerHasExpired0 = true;
 static volatile bool DAD_timerHasExpired1 = true;
 static volatile bool DAD_timerHasExpired2 = true;
 static volatile bool DAD_timerHasExpired3 = true;
 
-//Initialize timer with default function
-void DAD_Timer_Initialize(uint16_t period_ms, uint32_t timerBase, Timer_A_UpModeConfig *timerConfig){
-    //Set config
-    timerConfig->clockSource = TIMER_A_CLOCKSOURCE_ACLK,                                        // ACLK Clock Source
-    timerConfig->clockSourceDivider = TIMER_A_CLOCKSOURCE_DIVIDER_32,                           // 1024Hz =~1ms period
-    timerConfig->timerPeriod = period_ms,                                                    // Period in ticks
+// Initialize timer with default function
+void DAD_Timer_Initialize_ms(uint16_t period_ms, uint32_t timerBase, Timer_A_UpModeConfig *timerConfig){
+    // Set up LED (DEBUG)
+    MAP_GPIO_setAsOutputPin(GPIO_PORT_P1, GPIO_PIN0);
+    MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0);
+
+    // Set config
+    timerConfig->clockSource = TIMER_A_CLOCKSOURCE_ACLK;                                        // ACLK Clock Source
+    timerConfig->clockSourceDivider = TIMER_A_CLOCKSOURCE_DIVIDER_32;                           // 1024Hz =~1ms period
+    timerConfig->timerPeriod = (uint_fast16_t)(0.9765625f * period_ms);                         // Period in ticks
     timerConfig->timerInterruptEnable_TAIE = TIMER_A_TAIE_INTERRUPT_DISABLE;                    // Disable Timer interrupt
     timerConfig->captureCompareInterruptEnable_CCR0_CCIE = TIMER_A_CCIE_CCR0_INTERRUPT_ENABLE;  // Enable CCR0 interrupt
     timerConfig->timerClear = TIMER_A_DO_CLEAR;                                                 // Clear value
 
     //Configure timer mode
     MAP_Timer_A_configureUpMode(timerBase, timerConfig);
+}
 
-    //Decide which interrupt
-    uint32_t interruptNum;
-    switch(timerBase){
-    case TIMER_A0_BASE:
-        interruptNum = INT_TA0_0;
-        DAD_timerHasExpired0 = false;
-        break;
-    case TIMER_A1_BASE:
-        interruptNum = INT_TA1_0;
-        DAD_timerHasExpired1 = false;
-        break;
-    case TIMER_A2_BASE:
-        interruptNum = INT_TA2_0;
-        DAD_timerHasExpired2 = false;
-        break;
-    case TIMER_A3_BASE:
-        interruptNum = INT_TA3_0;
-        DAD_timerHasExpired3 = false;
-    }
+void DAD_Timer_Initialize_us(uint16_t period_us, uint32_t timerBase, Timer_A_UpModeConfig *timerConfig){
+    // Set up LED (DEBUG)
+    MAP_GPIO_setAsOutputPin(GPIO_PORT_P1, GPIO_PIN0);
+    MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0);
 
-    MAP_Interrupt_enableInterrupt(interruptNum);    //Enable timer interrupt
-    MAP_Interrupt_enableMaster();                   //Enable interrupts
-    MAP_Interrupt_disableSleepOnIsrExit();          //Don't sleep, boi
+    // Set config
+    float freq = MAP_CS_getSMCLK()/1000000.0;
+    timerConfig->clockSource = TIMER_A_CLOCKSOURCE_SMCLK;                                       // ACLK Clock Source
+    timerConfig->clockSourceDivider = TIMER_A_CLOCKSOURCE_DIVIDER_1;                            // 1024Hz =~1ms period
+    timerConfig->timerPeriod = (uint_fast16_t)(period_us * freq);                               // Period in ticks
+    timerConfig->timerInterruptEnable_TAIE = TIMER_A_TAIE_INTERRUPT_DISABLE;                    // Disable Timer interrupt
+    timerConfig->captureCompareInterruptEnable_CCR0_CCIE = TIMER_A_CCIE_CCR0_INTERRUPT_ENABLE;  // Enable CCR0 interrupt
+    timerConfig->timerClear = TIMER_A_DO_CLEAR;                                                 // Clear value
+
+    //Configure timer mode
+    MAP_Timer_A_configureUpMode(timerBase, timerConfig);
 }
 
 //Start Timer
 void DAD_Timer_Start(uint32_t timerBase){
+    DAD_Timer_Set_Interrupt(timerBase);
     MAP_Timer_A_startCounter(timerBase, TIMER_A_UP_MODE);
 
     //Set Timer Flag
@@ -85,7 +84,7 @@ bool DAD_Timer_Has_Finished(uint32_t timerBase){
 }
 
 //Stop Timer
-void DAD_Timer_Stop(uint32_t timerBase){
+void DAD_Timer_Stop(uint32_t timerBase, Timer_A_UpModeConfig *timerConfig){
     //Stop timer
     MAP_Timer_A_stopTimer(timerBase);
 
@@ -103,6 +102,32 @@ void DAD_Timer_Stop(uint32_t timerBase){
         case TIMER_A3_BASE:
             DAD_timerHasExpired3 = true;
     }
+}
+
+static void DAD_Timer_Set_Interrupt(uint32_t timerBase){
+    //Decide which interrupt
+    uint32_t interruptNum;
+    switch(timerBase){
+    case TIMER_A0_BASE:
+        interruptNum = INT_TA0_0;
+        DAD_timerHasExpired0 = false;
+        break;
+    case TIMER_A1_BASE:
+        interruptNum = INT_TA1_0;
+        DAD_timerHasExpired1 = false;
+        break;
+    case TIMER_A2_BASE:
+        interruptNum = INT_TA2_0;
+        DAD_timerHasExpired2 = false;
+        break;
+    case TIMER_A3_BASE:
+        interruptNum = INT_TA3_0;
+        DAD_timerHasExpired3 = false;
+    }
+
+    MAP_Interrupt_enableInterrupt(interruptNum);    //Enable timer interrupt
+    MAP_Interrupt_enableMaster();                   //Enable interrupts
+    MAP_Interrupt_disableSleepOnIsrExit();          //Don't sleep, boi
 }
 
 //Interrupt handlers

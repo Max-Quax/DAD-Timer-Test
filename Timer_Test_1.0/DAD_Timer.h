@@ -12,9 +12,14 @@
                     Else, set timer expired flag high
 
                     Only 4 timers can be initialized at a time
+
+                    ms mode:
                     Timer runs at 1024Hz, which is approx 1ms period.
-                    Max period of about 65535ms
-                    If more precision is needed, use a DCO
+                    Max period of about 65535ms. Min period of about 2ms.
+
+                    us mode:
+                    Timer runs at SMCLK, which defaults to 3MHz.
+                    Worst case max period is 1365us (at SMCLK = 48Mhz). Min period of 1us.
  */
 
 #ifndef DAD_TIMER_H_
@@ -30,8 +35,11 @@
 //Timer Defines
 #define DAD_DEFAULT_TIMER_TICKS    0x2DC6
 
-//Initialize timer
-void DAD_Timer_Initialize(uint16_t period_ms, uint32_t timerBase, Timer_A_UpModeConfig *timerConfig);
+//Initialize timer in milliseconds
+void DAD_Timer_Initialize_ms(uint16_t period_ms, uint32_t timerBase, Timer_A_UpModeConfig *timerConfig);
+
+//Initialize timer in microseconds
+void DAD_Timer_Initialize_us(uint16_t period_us, uint32_t timerBase, Timer_A_UpModeConfig *timerConfig);
 
 //Start Timer
 void DAD_Timer_Start(uint32_t timerBase);
@@ -39,6 +47,8 @@ void DAD_Timer_Start(uint32_t timerBase);
 bool DAD_Timer_Has_Finished(uint32_t timerBase);
 
 //Stop Timer
-void DAD_Timer_Stop(uint32_t timerBase);
+void DAD_Timer_Stop(uint32_t timerBase, Timer_A_UpModeConfig *timerConfig);
+
+static void DAD_Timer_Set_Interrupt(uint32_t timerBase);
 
 #endif /* DAD_TIMER_H_ */

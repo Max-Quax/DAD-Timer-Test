@@ -60,14 +60,9 @@ int main(void)
     /* Stop WDT  */
     MAP_WDT_A_holdTimer();
 
-    /* Configuring P1.0 as output */
-    MAP_GPIO_setAsOutputPin(GPIO_PORT_P1, GPIO_PIN0);
-    MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0);
-
-
-    //Debug - Timer start
+    // Debug - Timer start
     Timer_A_UpModeConfig config;
-    DAD_Timer_Initialize(1000, TIMER_A3_BASE, &config);
+    DAD_Timer_Initialize_ms(1000, TIMER_A3_BASE, &config);
     DAD_Timer_Start(TIMER_A3_BASE);
 
     //DAD_Timer_Stop(TIMER_A0_BASE);
@@ -80,7 +75,7 @@ int main(void)
             x++;
         }
         else if(x >= 5){
-            DAD_Timer_Stop(TIMER_A3_BASE);
+            DAD_Timer_Stop(TIMER_A3_BASE, &config);
         }
     }
 }
