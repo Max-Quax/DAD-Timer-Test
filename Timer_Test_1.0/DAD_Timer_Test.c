@@ -60,7 +60,7 @@ int main(void)
     /* Stop WDT  */
     MAP_WDT_A_holdTimer();
 
-    // Debug - Timer start
+    // Timer start
     Timer_A_UpModeConfig config;
     DAD_Timer_Initialize_ms(1000, TIMER_A3_BASE, &config);
     DAD_Timer_Start(TIMER_A3_BASE);

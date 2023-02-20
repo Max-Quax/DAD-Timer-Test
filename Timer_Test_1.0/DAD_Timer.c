@@ -15,6 +15,9 @@ static volatile bool DAD_timerHasExpired3 = true;
 
 // Initialize timer with default function
 void DAD_Timer_Initialize_ms(uint16_t period_ms, uint32_t timerBase, Timer_A_UpModeConfig *timerConfig){
+    // Stop timer if in use
+    MAP_Timer_A_stopTimer(timerBase);
+
     // Set up LED (DEBUG)
     MAP_GPIO_setAsOutputPin(GPIO_PORT_P1, GPIO_PIN0);
     MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0);
@@ -32,6 +35,9 @@ void DAD_Timer_Initialize_ms(uint16_t period_ms, uint32_t timerBase, Timer_A_UpM
 }
 
 void DAD_Timer_Initialize_us(uint16_t period_us, uint32_t timerBase, Timer_A_UpModeConfig *timerConfig){
+    // Stop timer if in use
+    MAP_Timer_A_stopTimer(timerBase);
+
     // Set up LED (DEBUG)
     MAP_GPIO_setAsOutputPin(GPIO_PORT_P1, GPIO_PIN0);
     MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0);
