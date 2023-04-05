@@ -73,7 +73,7 @@ int main(void)
     // Initialize software timer.
     DAD_SW_Timer_initHardware();
 
-    // Wait 12 seconds, then turn on LED
+    // Wait 120 seconds, then turn on LED
     while(currentTimeMS <= 120000){
         currentTimeMS = DAD_SW_Timer_getMS();       // Get ms since starting (max of 32 bits)
     }
