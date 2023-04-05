@@ -25,6 +25,9 @@
 #ifndef DAD_TIMER_H_
 #define DAD_TIMER_H_
 
+// Config defines
+#define SET_TIMER_3_AS_SW_TIMER
+
 // DriverLib Includes
 #include <ti/devices/msp432p4xx/driverlib/driverlib.h>
 

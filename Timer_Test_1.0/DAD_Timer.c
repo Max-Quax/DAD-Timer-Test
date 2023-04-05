@@ -204,7 +204,7 @@ void TA2_0_IRQHandler(void)
     DAD_timerHasExpired2 = true;
 }
 
-
+#ifndef SET_TIMER_3_AS_SW_TIMER
 void TA3_0_IRQHandler(void)
 {
     MAP_Timer_A_stopTimer(TIMER_A3_BASE);                                           // Stop timer
@@ -221,3 +221,4 @@ void TA3_0_IRQHandler(void)
     // Set Timer Flag
     DAD_timerHasExpired3 = true;
 }
+#endif

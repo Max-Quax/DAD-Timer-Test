@@ -47,24 +47,60 @@
  * Author: 
 *******************************************************************************/
 /* DriverLib Includes */
-#include <DAD_Timer.h>
 #include <ti/devices/msp432p4xx/driverlib/driverlib.h>
+
+// HAL includes
+#include <DAD_Timer.h>
+#include <DAD_SW_Timer.h>
 
 /* Standard Includes */
 #include <stdint.h>
 #include <stdbool.h>
 
+// Test config
+    // SIMPLE_TIMER_TEST
+    // SW_TIMER_TEST
+#define SW_TIMER_TEST
 
 int main(void)
 {
     /* Stop WDT  */
     MAP_WDT_A_holdTimer();
 
+    #ifdef SW_TIMER_TEST
+
+    int currentTimeMS = 0;
+    // Initialize software timer.
+    DAD_SW_Timer_initHardware();
+
+    // Wait 12 seconds, then turn on LED
+    while(currentTimeMS <= 120000){
+        currentTimeMS = DAD_SW_Timer_getMS();       // Get ms since starting (max of 32 bits)
+    }
+    MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);
+
+    // Test Finished
+    while(true);
+
+
+    #endif
+
+    #ifdef SIMPLE_TIMER_TEST
+
     // Timer start
     Timer_A_UpModeConfig config;
     DAD_Timer_Initialize_ms(1000, TIMER_A3_BASE, &config);
+    DAD_Timer_Initialize_ms(1000, TIMER_A2_BASE, &config);
     DAD_Timer_Start(TIMER_A3_BASE);
 
+    // Test timer restart
+//    while(){                                           // Forever loop
+//        while(!DAD_Timer_Has_Finished(TIMER_A3_BASE)); // Wait until timer expires
+//        DAD_Timer_Restart(TIMER_A3_BASE, &config);
+//        MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);
+//    }
+    //
+//
     //DAD_Timer_Stop(TIMER_A0_BASE);
     int freq = CS_getACLK() / 32;
     int x = 0;
@@ -78,4 +114,5 @@ int main(void)
             DAD_Timer_Stop(TIMER_A3_BASE, &config);
         }
     }
+    #endif
 }
