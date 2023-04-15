@@ -26,7 +26,7 @@ int DAD_SW_Timer_getMS(){
 void TA3_0_IRQHandler(void)
 {
     tickCounter++;  // Increment ticks
-    uint32_t intStatus = Timer_A_getEnabledInterruptStatus(EUSCI_A3_BASE);
+    uint32_t intStatus = MAP_Timer_A_getEnabledInterruptStatus(EUSCI_A3_BASE);
 
     // Clear interrupt
     MAP_Timer_A_clearInterruptFlag(TIMER_A3_BASE);

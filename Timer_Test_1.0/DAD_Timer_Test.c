@@ -52,20 +52,56 @@
 // HAL includes
 #include <DAD_Timer.h>
 #include <DAD_SW_Timer.h>
+#include <DAD_RTC.h>
 
 /* Standard Includes */
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 
 // Test config
     // SIMPLE_TIMER_TEST
     // SW_TIMER_TEST
-#define SW_TIMER_TEST
+    // RTC_TIMER_TEST
+#define RTC_TIMER_TEST
 
 int main(void)
 {
     /* Stop WDT  */
     MAP_WDT_A_holdTimer();
+
+    #ifdef RTC_TIMER_TEST
+
+    int currentTimeMS = 0;
+    char currentTime[RTC_OUTPUT_STR_LEN];
+
+    // Init RTC
+    RTC_C_Calendar calendarStruct;
+    calendarStruct.dayOfWeek = 0x01;
+    calendarStruct.dayOfmonth = 0x01;
+    calendarStruct.hours = 0x00;
+    calendarStruct.minutes= 0x00;
+    calendarStruct.month = 0x01;
+    calendarStruct.seconds = 0x00;
+    calendarStruct.year = 2000;
+    DAD_RTC_init(&calendarStruct);
+
+    // Initialize software timer.
+    DAD_SW_Timer_initHardware();
+
+    while(true){
+        uint64_t refTime = DAD_SW_Timer_getMS();
+
+        // Wait 3 seconds, then turn on LED and check RTC
+        while(currentTimeMS <= refTime + 3000){
+            currentTimeMS = DAD_SW_Timer_getMS();       // Get ms since starting (max of 32 bits)
+        }
+        DAD_RTC_getTime(currentTime);
+        MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);
+    }
+
+    #endif
+
 
     #ifdef SW_TIMER_TEST
 
@@ -81,7 +117,6 @@ int main(void)
 
     // Test Finished
     while(true);
-
 
     #endif
 
