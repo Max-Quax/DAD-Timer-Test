@@ -63,12 +63,55 @@
     // SIMPLE_TIMER_TEST
     // SW_TIMER_TEST
     // RTC_TIMER_TEST
-#define RTC_TIMER_TEST
+    // RTC_TIMER_TEST_WITH_FLASH
+#define RTC_TIMER_TEST_WITH_FLASH
+
 
 int main(void)
 {
     /* Stop WDT  */
     MAP_WDT_A_holdTimer();
+
+    #ifdef RTC_TIMER_TEST_WITH_FLASH
+
+    int currentTimeMS = 0;
+    char currentTime[RTC_OUTPUT_STR_LEN];
+
+    // Init RTC
+//    MAP_PCM_setCoreVoltageLevel(PCM_VCORE1);
+//    MAP_FlashCtl_setWaitState(FLASH_BANK0, 1);
+//    MAP_FlashCtl_setWaitState(FLASH_BANK1, 1);
+//    MAP_CS_setDCOCenteredFrequency(CS_DCO_FREQUENCY_48);
+
+    DAD_RTC_initFromFlash();
+    DAD_RTC_getTime(currentTime);
+
+    // Initialize software timer.
+    DAD_SW_Timer_initHardware();
+
+    while(true){
+        // Debug
+        uint8_t readFromFlash[FLASH_BLOCK_SIZE];
+        uint8_t rtcArr[FLASH_BLOCK_SIZE];
+        RTC_C_Calendar calendarStruct;
+        memset(rtcArr, 128, FLASH_BLOCK_SIZE);
+
+        uint64_t refTime = DAD_SW_Timer_getMS();
+
+        // Wait 3 seconds, then turn on LED and check RTC
+        while(currentTimeMS <= refTime + 3000){
+            currentTimeMS = DAD_SW_Timer_getMS();       // Get ms since starting (max of 32 bits)
+        }
+        DAD_RTC_getTime(currentTime);
+        MAP_GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);
+
+        // Store data
+        DAD_RTC_saveTime();
+
+    }
+
+    #endif
+
 
     #ifdef RTC_TIMER_TEST
 
